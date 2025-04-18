@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoices{% endblock %}
+
+{% block content %}
+<h2>Invoices</h2>
+<hr>
+<div class="table-responsive">
+    <table class="table table-striped table-hover table-sm">
+        <thead>
+            <tr>
+                <th>Invoice #</th>
+                <th>Transaction Date</th>
+                <th>Created On</th>
+                <th>FY</th>
+                <th>Sub-Office</th>
+                <th>Stock Category</th>
+                <th>Qty</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for invoice in invoices_pagination.items %}
+            <tr>
+                <td>{{ invoice.invoice_number }}</td>
+                <td>{{ invoice.date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ invoice.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>{{ invoice.financial_year }}</td>
+                <td>{{ invoice.office.name }}</td>
+                <td>{{ invoice.stock_category.name }}</td>
+                <td>{{ invoice.quantity }}</td>
+                <td>
+                    <a href="{{ url_for('main.view_invoice_pdf', invoice_id=invoice.id) }}" class="btn btn-sm btn-outline-info" target="_blank" title="View PDF">
+                        View PDF
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No invoices found. Supply stock to generate invoices.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if invoices_pagination.pages > 1 %}
+<nav aria-label="Invoice navigation">
+  <ul class="pagination justify-content-center">
+    {# Previous Page Link #}
+    <li class="page-item {% if not invoices_pagination.has_prev %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('main.list_invoices', page=invoices_pagination.prev_num) if invoices_pagination.has_prev else '#' }}" aria-label="Previous">
+        <span aria-hidden="true">&laquo;</span>
+      </a>
+    </li>
+
+    {# Page Numbers #}
+    {% for page_num in invoices_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+      {% if page_num %}
+        {% if invoices_pagination.page == page_num %}
+          <li class="page-item active" aria-current="page"><span class="page-link">{{ page_num }}</span></li>
+        {% else %}
+          <li class="page-item"><a class="page-link" href="{{ url_for('main.list_invoices', page=page_num) }}">{{ page_num }}</a></li>
+        {% endif %}
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+
+    {# Next Page Link #}
+    <li class="page-item {% if not invoices_pagination.has_next %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('main.list_invoices', page=invoices_pagination.next_num) if invoices_pagination.has_next else '#' }}" aria-label="Next">
+        <span aria-hidden="true">&raquo;</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

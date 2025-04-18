@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Sub-Offices{% endblock %}
+
+{% block content %}
+<h2>Manage Sub-Offices</h2>
+<hr>
+<div class="row g-4">
+    <div class="col-md-5">
+        <h3>Add New Office</h3>
+        <form method="POST" action="{{ url_for('main.manage_offices') }}" class="needs-validation" novalidate>
+            <input type="hidden" name="action" value="add">
+            <div class="mb-3">
+                <label for="name" class="form-label">Office Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+                <div class="invalid-feedback">Please provide an office name.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Office</button>
+        </form>
+    </div>
+    <div class="col-md-7">
+        <h3>Existing Offices</h3>
+        {% if offices %}
+        <div class="list-group">
+            {% for office in offices %}
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                {{ office.name }}
+                <form method="POST" action="{{ url_for('main.manage_offices') }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{ office.name }}? This cannot be undone if it has transactions.');">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" name="office_id" value="{{ office.id }}">
+                    <button type="submit" class="btn btn-danger btn-sm" {% if office.transactions or office.invoices %}disabled title="Cannot delete: Office has associated records"{% endif %}>
+                        Delete
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info" role="alert">
+            No sub-offices defined yet. Use the form to add one.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+// Form validation
+(function () {
+  'use strict'
+  var forms = document.querySelectorAll('.needs-validation')
+  Array.prototype.slice.call(forms)
+    .forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        if (!form.checkValidity()) {
+          event.preventDefault()
+          event.stopPropagation()
+        }
+        form.classList.add('was-validated')
+      }, false)
+    })
+})()
+</script>
+{% endblock %}
+{% endblock %}

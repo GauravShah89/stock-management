@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Stock Management{% endblock %} - Head Office</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <style>
+        body { padding-top: 4.5rem; } /* Adjust padding for fixed navbar */
+        .flash-messages .alert { margin-top: 1rem; }
+        .table th, .table td { vertical-align: middle; }
+        .container { max-width: 1140px; } /* Limit container width */
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('main.index') }}">HO Stock Manager</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.stock_report' %}active{% endif %}" href="{{ url_for('main.stock_report') }}">Stock Report</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                         <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.receive_stock', 'main.supply_stock'] %}active{% endif %}" href="#" id="navbarDropdownStock" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           Stock Actions
+                         </a>
+                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownStock">
+                           <li><a class="dropdown-item" href="{{ url_for('main.receive_stock') }}">Receive Stock</a></li>
+                           <li><a class="dropdown-item" href="{{ url_for('main.supply_stock') }}">Supply Stock</a></li>
+                         </ul>
+                    </li>
+                     <li class="nav-item dropdown">
+                         <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.manage_stock', 'main.manage_offices'] %}active{% endif %}" href="#" id="navbarDropdownManage" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           Manage
+                         </a>
+                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownManage">
+                           <li><a class="dropdown-item" href="{{ url_for('main.manage_stock') }}">Stock Categories</a></li>
+                           <li><a class="dropdown-item" href="{{ url_for('main.manage_offices') }}">Sub-Offices</a></li>
+                         </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                         <a class="nav-link dropdown-toggle {% if request.endpoint in ['main.stock_report', 'main.daily_supply_report'] %}active{% endif %}" href="#" id="navbarDropdownReports" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                           Reports
+                         </a>
+                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownReports">
+                           <li><a class="dropdown-item" href="{{ url_for('main.stock_report') }}">Stock Report</a></li>
+                           <li><a class="dropdown-item" href="{{ url_for('main.daily_supply_report') }}">Daily Supply Report</a></li>
+                         </ul>
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint == 'main.list_invoices' %}active{% endif %}" href="{{ url_for('main.list_invoices') }}">View Invoices</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container">
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="container mt-4 text-muted text-center">
+        <p>&copy; Stock Management System {{ now().year }}</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

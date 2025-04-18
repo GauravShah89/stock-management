@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3">
+  <div class="container-fluid py-5">
+    <h1 class="display-5 fw-bold">Stock Management System</h1>
+    <p class="col-md-8 fs-4">Welcome to the Head Office Stock and Invoice Management System.</p>
+    <p>Use the navigation bar above to manage stock, offices, view reports, and generate invoices.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('main.stock_report') }}" role="button">View Current Stock Report &raquo;</a>
+  </div>
+</div>
+{% endblock %}
