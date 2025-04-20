@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Acknowledgments{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Acknowledgments</h2>
+    <div>
+        <a href="{{ url_for('main.list_invoices') }}" class="btn btn-outline-secondary">
+            View All Invoices
+        </a>
+    </div>
+</div>
+<hr>
+
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+        <a class="nav-link active" href="#pending" data-bs-toggle="tab">Pending</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="#acknowledged" data-bs-toggle="tab">Acknowledged</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="pending">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Sub-Office</th>
+                        <th>Category</th>
+                        <th>Qty</th>
+                        <th>Serial Numbers</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices if invoice.acknowledgment_status == 'PENDING' %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ invoice.office.name }}</td>
+                        <td>{{ invoice.stock_category.name }}</td>
+                        <td>{{ invoice.quantity }}</td>
+                        <td><small>{{ invoice.serial_numbers or 'N/A' }}</small></td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td>
+                            <button type="button" class="btn btn-sm btn-success" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#acknowledgeModal{{ invoice.id }}">
+                                Acknowledge
+                            </button>
+                            <a href="{{ url_for('main.view_invoice_pdf', invoice_id=invoice.id) }}" 
+                               class="btn btn-sm btn-outline-info" target="_blank">
+                                View Invoice
+                            </a>
+                        </td>
+                    </tr>
+                    
+                    <!-- Acknowledge Modal -->
+                    <div class="modal fade" id="acknowledgeModal{{ invoice.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="{{ url_for('main.acknowledge_invoice', invoice_id=invoice.id) }}" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Acknowledge Invoice #{{ invoice.invoice_number }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="acknowledgment_note" class="form-label">Acknowledgment Note</label>
+                                            <textarea class="form-control" name="acknowledgment_note" rows="3" 
+                                                      placeholder="Enter any notes about the acknowledgment"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-success">Confirm Acknowledgment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No pending acknowledgments found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="acknowledged">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>Invoice #</th>
+                        <th>Date</th>
+                        <th>Sub-Office</th>
+                        <th>Category</th>
+                        <th>Qty</th>
+                        <th>Acknowledged On</th>
+                        <th>Note</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for invoice in invoices if invoice.acknowledgment_status == 'ACKNOWLEDGED' %}
+                    <tr>
+                        <td>{{ invoice.invoice_number }}</td>
+                        <td>{{ invoice.date.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ invoice.office.name }}</td>
+                        <td>{{ invoice.stock_category.name }}</td>
+                        <td>{{ invoice.quantity }}</td>
+                        <td>{{ invoice.acknowledgment_date.strftime('%Y-%m-%d') }}</td>
+                        <td><small>{{ invoice.acknowledgment_note or 'No note' }}</small></td>
+                        <td>
+                            <a href="{{ url_for('main.view_invoice_pdf', invoice_id=invoice.id) }}" 
+                               class="btn btn-sm btn-outline-info" target="_blank">
+                                View Invoice
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-warning" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#modifyAcknowledgmentModal{{ invoice.id }}">
+                                Modify
+                            </button>
+                        </td>
+                    </tr>
+                    
+                    <!-- Modify Acknowledgment Modal -->
+                    <div class="modal fade" id="modifyAcknowledgmentModal{{ invoice.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <form action="{{ url_for('main.modify_acknowledgment', invoice_id=invoice.id) }}" method="POST">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Modify Acknowledgment - Invoice #{{ invoice.invoice_number }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="acknowledgment_status" class="form-label">Status</label>
+                                            <select class="form-select" name="acknowledgment_status" required>
+                                                <option value="PENDING" {% if invoice.acknowledgment_status == 'PENDING' %}selected{% endif %}>Pending</option>
+                                                <option value="ACKNOWLEDGED" {% if invoice.acknowledgment_status == 'ACKNOWLEDGED' %}selected{% endif %}>Acknowledged</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="acknowledgment_note" class="form-label">Acknowledgment Note</label>
+                                            <textarea class="form-control" name="acknowledgment_note" rows="3" 
+                                                      placeholder="Enter any notes about the acknowledgment">{{ invoice.acknowledgment_note or '' }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-warning">Update Acknowledgment</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center">No acknowledged invoices found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

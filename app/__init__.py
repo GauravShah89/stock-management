@@ -1,12 +1,14 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from dotenv import load_dotenv
 
 # Load environment variables from .env file (optional but recommended)
 load_dotenv()
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app():
     """Create and configure an instance of the Flask application."""
@@ -29,14 +31,12 @@ def create_app():
 
     # Initialize extensions
     db.init_app(app)
+    migrate.init_app(app, db)  # Initialize Flask-Migrate
 
     with app.app_context():
         # Import parts of our application
         from . import routes
         from . import models # Import models to ensure they are known to SQLAlchemy
-
-        # Create database tables for our models
-        db.create_all()
 
         # Register Blueprints
         app.register_blueprint(routes.main_bp)

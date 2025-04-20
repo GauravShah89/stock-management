@@ -4,11 +4,44 @@
 
 {% block content %}
 <div class="p-5 mb-4 bg-light rounded-3">
-  <div class="container-fluid py-5">
-    <h1 class="display-5 fw-bold">Stock Management System</h1>
-    <p class="col-md-8 fs-4">Welcome to the Head Office Stock and Invoice Management System.</p>
-    <p>Use the navigation bar above to manage stock, offices, view reports, and generate invoices.</p>
-    <a class="btn btn-primary btn-lg" href="{{ url_for('main.stock_report') }}" role="button">View Current Stock Report &raquo;</a>
-  </div>
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold">Stock Management System</h1>
+        <p class="col-md-8 fs-4">Welcome to the Head Office Stock and Invoice Management System.</p>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h4>Quick Actions</h4>
+                <div class="list-group">
+                    <a href="{{ url_for('main.receive_stock') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box-arrow-in-down"></i> Receive Stock
+                    </a>
+                    <a href="{{ url_for('main.supply_stock') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-box-arrow-up"></i> Supply Stock
+                    </a>
+                    <a href="{{ url_for('main.pending_acknowledgments') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-clipboard-check"></i> Manage Acknowledgments
+                        {% with pending_count = Invoice.query.filter_by(acknowledgment_status='PENDING').count() %}
+                        {% if pending_count > 0 %}
+                        <span class="badge bg-warning text-dark float-end">{{ pending_count }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4>Reports</h4>
+                <div class="list-group">
+                    <a href="{{ url_for('main.stock_report') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-graph-up"></i> Current Stock Report
+                    </a>
+                    <a href="{{ url_for('main.daily_supply_report') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calendar3"></i> Daily Supply Report
+                    </a>
+                    <a href="{{ url_for('main.list_invoices') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-files"></i> Detailed Reports
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

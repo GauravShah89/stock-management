@@ -15,22 +15,43 @@
                 <option value="{{ category.id }}" {% if selected_category == category.id|string %}selected{% endif %}>{{ category.name }}</option>
                 {% endfor %}
             </select>
-             <div class="invalid-feedback">Please select a stock category.</div>
+            <div class="invalid-feedback">Please select a stock category.</div>
         </div>
+
         <div class="col-md-3">
             <label for="quantity" class="form-label">Quantity Received</label>
             <input type="number" class="form-control" id="quantity" name="quantity" min="1" required value="{{ entered_quantity or '' }}">
             <div class="invalid-feedback">Please enter a positive quantity.</div>
         </div>
-         <div class="col-md-3">
-            <label for="transaction_date" class="form-label">Transaction Date</label>
-            <input type="date" class="form-control" id="transaction_date" name="transaction_date" value="{{ entered_date or today_date }}">
-            <small class="form-text text-muted">Defaults to today if left blank.</small>
-             <div class="invalid-feedback">Please enter a valid date.</div>
+
+        <div class="col-md-3">
+            <label for="reference_invoice" class="form-label">Invoice Reference</label>
+            <input type="text" class="form-control" id="reference_invoice" name="reference_invoice" 
+                   placeholder="Enter invoice number">
         </div>
+
+        <div class="col-md-12">
+            <label for="serial_numbers" class="form-label">Serial Numbers</label>
+            <textarea class="form-control" id="serial_numbers" name="serial_numbers" rows="2" 
+                      placeholder="Enter serial numbers separated by commas"></textarea>
+        </div>
+
+        <div class="col-md-12">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="2" 
+                      placeholder="Add any additional notes"></textarea>
+        </div>
+
+        <div class="col-md-3">
+            <label for="transaction_date" class="form-label">Transaction Date</label>
+            <input type="date" class="form-control" id="transaction_date" name="transaction_date" 
+                   value="{{ entered_date or today_date }}">
+            <div class="invalid-feedback">Please enter a valid date.</div>
+        </div>
+
         <div class="col-12 mt-4">
-             <button type="submit" class="btn btn-success">Record Stock Received</button>
-             <a href="{{ url_for('main.stock_report') }}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-success">Record Stock Received</button>
+            <a href="{{ url_for('main.stock_report') }}" class="btn btn-secondary">Cancel</a>
         </div>
     </div>
 </form>

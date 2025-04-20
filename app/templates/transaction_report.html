@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction Report{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Transaction Report</h2>
+    <div>
+        <a href="#" class="btn btn-outline-secondary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Print Report
+        </a>
+    </div>
+</div>
+
+<form method="GET" class="card mb-4">
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label for="from_date" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="from_date" name="from_date" value="{{ from_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="to_date" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="to_date" name="to_date" value="{{ to_date }}">
+            </div>
+            <div class="col-md-3">
+                <label for="category_id" class="form-label">Stock Category</label>
+                <select class="form-select" id="category_id" name="category_id">
+                    <option value="">All Categories</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="office_id" class="form-label">Sub-Office</label>
+                <select class="form-select" id="office_id" name="office_id">
+                    <option value="">All Offices</option>
+                    {% for office in offices %}
+                    <option value="{{ office.id }}" {% if selected_office == office.id %}selected{% endif %}>
+                        {{ office.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="transaction_type" class="form-label">Transaction Type</label>
+                <select class="form-select" id="transaction_type" name="transaction_type">
+                    <option value="">All Types</option>
+                    <option value="IN" {% if selected_type == 'IN' %}selected{% endif %}>Stock IN</option>
+                    <option value="OUT" {% if selected_type == 'OUT' %}selected{% endif %}>Stock OUT</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="sort_by" class="form-label">Sort By</label>
+                <select class="form-select" id="sort_by" name="sort_by">
+                    <option value="transaction_date" {% if sort_by == 'transaction_date' %}selected{% endif %}>Date</option>
+                    <option value="category" {% if sort_by == 'category' %}selected{% endif %}>Category</option>
+                    <option value="quantity" {% if sort_by == 'quantity' %}selected{% endif %}>Quantity</option>
+                    <option value="office" {% if sort_by == 'office' %}selected{% endif %}>Office</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="sort_order" class="form-label">Sort Order</label>
+                <select class="form-select" id="sort_order" name="sort_order">
+                    <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Ascending</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{{ url_for('main.transaction_report') }}" class="btn btn-outline-secondary ms-2">Reset</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Quantity</th>
+                <th>Office</th>
+                <th>Invoice/Ref</th>
+                <th>Serial Numbers</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tx in transactions.items %}
+            <tr>
+                <td>{{ tx.transaction_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if tx.transaction_type == 'IN' %}
+                        <span class="badge bg-success">IN</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">OUT</span>
+                    {% endif %}
+                </td>
+                <td>{{ tx.stock_category.name }}</td>
+                <td>{{ tx.quantity|abs }}</td>
+                <td>{{ tx.office.name if tx.office else 'Head Office' }}</td>
+                <td>
+                    {% if tx.invoice %}
+                        <a href="{{ url_for('main.view_invoice_pdf', invoice_id=tx.invoice.id) }}" target="_blank">
+                            {{ tx.invoice.invoice_number }}
+                        </a>
+                    {% else %}
+                        {{ tx.reference_invoice or '-' }}
+                    {% endif %}
+                </td>
+                <td><small>{{ tx.serial_numbers or '-' }}</small></td>
+                <td><small>{{ tx.notes or '-' }}</small></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center">No transactions found matching the criteria.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if transactions.pages > 1 %}
+<nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if transactions.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.transaction_report', page=transactions.prev_num, **request.args) }}">Previous</a>
+        </li>
+        {% endif %}
+
+        {% for page_num in transactions.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+            {% if page_num %}
+                {% if transactions.page == page_num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.transaction_report', page=page_num, **request.args) }}">{{ page_num }}</a>
+                </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if transactions.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('main.transaction_report', page=transactions.next_num, **request.args) }}">Next</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

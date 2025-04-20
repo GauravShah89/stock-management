@@ -32,6 +32,11 @@
             <input type="number" class="form-control" id="quantity" name="quantity" min="1" required value="{{ entered_quantity or '' }}">
             <div class="invalid-feedback">Please enter a positive quantity.</div>
         </div>
+        <div class="col-md-12">
+            <label for="serial_numbers" class="form-label">Serial Numbers</label>
+            <textarea class="form-control" id="serial_numbers" name="serial_numbers" rows="2" placeholder="Enter serial numbers separated by commas"></textarea>
+            <small class="form-text text-muted">Optional: Enter serial numbers for the supplied stock</small>
+        </div>
          <div class="col-md-3">
             <label for="transaction_date" class="form-label">Transaction Date</label>
             <input type="date" class="form-control" id="transaction_date" name="transaction_date" value="{{ entered_date or today_date }}">
